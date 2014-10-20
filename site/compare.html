@@ -1,0 +1,39 @@
+<script src="script.js"></script>
+<div id="outerLayer">
+<div id="compareLayer">
+
+				<h1>Select Two Teams to Compare</h1>
+				<form id="comparison">
+					<div id="left">
+						<div id="mid">
+					 		<input type="Submit" class="btn btn-default" value="Compare"/>
+						</div>
+						<input id="input1" type="text" class="form-control" name="Team1" placeholder="Enter Team 1"/>
+					</div>
+
+					<div id="right">
+						<input id="input2" type="text" class="form-control" name="Team2" placeholder="Enter Team 2"/>
+				</form>
+					</div>
+
+					<div id="results">
+					</div>
+					<div id="footer">
+						Data collected from the <a href="http://www.ncaa.com/standings/basketball-men/d1/2013">NCAA Men's Basketball</a> website as well as <a href="http://espn.go.com/mens-college-basketball/standings">ESPN's</a> website dedicated to College Basketball.
+					</div>
+				</div>
+</div>
+<script>
+$(document).ready(function() 
+{                        
+    $("form").submit(function(event)
+    {
+    	event.preventDefault();
+    	$("#compareLayer").css("margin-top", "0%");		//added this and still works
+		$.post("compare", $("#comparison").serialize(), function(data,status)
+		{
+		    $( "#results" ).empty().append( data );
+		});
+    });
+});
+</script> 

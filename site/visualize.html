@@ -1,0 +1,192 @@
+<style>
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #eee;
+    shape-rendering: crispEdges;
+}
+ 
+.axis text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+}
+ 
+.circle {
+    fill: rgb(0, 0, 0);
+}
+
+.tooltip {   
+ /* display:block; */
+  position: fixed;           
+  text-align: center;  
+  color: white;
+  background-color:rgba(0, 0, 0, .8);         
+  width: 100px;                  
+  height: 40px;                 
+  padding: 5px;             
+  font: 14px sans-serif;        
+  border: 0px;      
+  border-radius: 2px;           
+  pointer-events: none;         
+}
+
+.tooltip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+
+</style>
+
+<div id="outerLayer">
+	<div id="matchLayer">
+		<h1>See for yourself</h1>
+		<form id="matchForm"> <!--onSubmit="graph()"-->
+			<div id="shift">
+        <div id="left" style="padding-left:10.4%">
+          <input id="input1" type="text" style="width:110%" class="form-control" name="team" placeholder="Enter A Team To See It's Performance Year by Year"/>
+        </div>
+        <div id="right" style="padding: 0.5% 0.2% 0% 0%">
+            <input type="Submit" class="btn btn-default"/></div>
+        </div>
+
+		</form>
+	</div>
+  <div id="results">
+  </div>
+  <div id="footer">
+    <hr/>
+    <h3>Credit where credit is due</h3>
+    <p>The resources I used to create the scatterplot (hopefully) displayed above: <a href="http://swizec.com/blog/quick-scatterplot-tutorial-for-d3-js/swizec/5337">Swizec's tutorial</a> &amp; <a href="http://bl.ocks.org/weiglemc/6185069">Weiglemc's example</a></p>
+    To get a better idea of how this works, check out my <a href="https://github.com/ntlam">GitHub</a></p>
+  </div>
+</div>
+
+
+<script>
+$("form").submit(function(event){
+  event.preventDefault();
+  $.post("visualize", $("#matchForm").serialize(), function(data,status){
+    if(data instanceof Array){
+      $( "#results" ).empty();
+      $( "#results" ).append("<h1>" + document.getElementById("input1").value + " (2002 - 2014)</h1>")
+      graph(data); 
+      w = 90,
+      h = 410,
+      r = [6, 7.5, 9, 10.5, 12, 13.5, 15, 16.5],
+      x = w / 2,
+      start = 20,
+      cy = getcY(start, h),
+      cl = getcY(start + 20, h);
+    $( "#results" ).append('<span style="padding-left:2%"> </span><svg width="'+ w +'" height="'+ h +/*'"' preserveAspectRatio="xMinYMin meet" viewBox="0 0 '+ w + ' '+ h +*/'"> <text x="' + x + '" y="' + start +'" font-family="Oswald, sans-serif" text-anchor="middle">Legend</text> <circle cx="' + x + '" cy="' + cy[0] +'" r="' + r[0] +'"/> <text x="' + x + '" y="' + cl[0] + '" font-family="Oswald, sans-serif" text-anchor="middle" font-size="12px">Not in Tournament</text> <circle cx="' + x + '" cy="' + cy[1] +'" r="' + r[1] + '"/> <text x="' + x + '" y="' + (cl[1] + 3) + '" font-family="Oswald, sans-serif" text-anchor="middle" font-size="12px">First Round</text> <circle cx="' + x + '" cy="' + cy[2] +'" r="' + r[2] + '"/> <text x="' + x + '" y="' + (cl[2] + 5) + '" font-family="Oswald, sans-serif" text-anchor="middle" font-size="12px">Second Round</text> <circle cx="' + x + '" cy="' + cy[3] +'" r="' + r[3] + '"/> <text x="' + x + '" y="' + (cl[3] + 7) + '" font-family="Oswald, sans-serif" text-anchor="middle" font-size="12px">Sweet 16</text> <circle cx="' + x + '" cy="' + cy[4] +'" r="' + r[4] +'"/> <text x="' + x + '" y="' + (cl[4] + 11) + '" font-family="Oswald, sans-serif" text-anchor="middle" font-size="12px">Elite 8</text> <circle cx="' + x + '" cy="' + cy[5] +'" r="' + r[5] + '"/> <text x="' + x + '" y="' + (cl[5] + 13) + '" font-family="Oswald, sans-serif" text-anchor="middle" font-size="12px">Final 4</text> <circle cx="' + x + '" cy="' + cy[6] +'" r="' + r[6] + '"/> <text x="' + x + '" y="' + (cl[6] + 14) + '" font-family="Oswald, sans-serif" text-anchor="middle" font-size="12px">Runner Up</text> <circle cx="' + x + '" cy="' + cy[7] +'" r="' + r[7] +'" style="fill:rgb(250,208,90)"/> <text x="' + x + '" y="' + (cl[7] + 17) + '" font-family="Oswald, sans-serif" text-anchor="middle" font-size="12px">Champion</text></svg>') 
+    $('html,body').animate({
+          scrollTop: $("#results").offset().top
+        }, 888);
+          return false;
+  }
+  else{$("#results").empty().append(data);}
+  });
+});
+
+function getcY(x, h) {
+    var arr = [];
+    arr.push(x + Math.ceil(((h - 90) / 8) / 2) + 8);
+    for (i = 1; i < 8; i++) {
+        arr.push(arr[i - 1] + Math.ceil(((h - 90) / 8) / 2) + (8 * (i / 1.5)));
+    }
+    return arr;
+}
+
+function graph (dataIn) {
+
+d3.selectAll("svg").remove(); 
+
+var w = $(window).width() * .65,
+    h = $(window).height() * .7,
+    pad = 20,
+    left_pad = 100;
+
+var svg = d3.select("#results")   //specifies which body element under which to append the svg
+        .append("svg")
+        .attr("width", w)
+        .attr("height", h)
+        // .attr("preserveAspectRatio", "xMinYMin meet")
+        // .attr(viewBox, '"0 0 ' + w + ' ' + h + '"');
+ 
+var x = function(d) { return d[0]; }, // data -> value
+    xScaled = d3.scale.linear().domain([2002, 2014]).range([left_pad, w-pad]), // value -> display
+    xMapped = function(d) { return xScaled(x(d));}, // mapping data -> display coordinates
+    xAxis = d3.svg.axis().scale(xScaled).orient("bottom").ticks(13, function(d){  return d3.format("%Y")});
+
+
+var y = function(d) { return d[1]; }, // data -> value
+    yScaled = d3.scale.linear().domain([1, 0]).range([pad, h-pad]), //used to be h-pad*2 value -> display
+    yMapped = function(d) { return yScaled(y(d));}, // data -> display
+    yAxis = d3.svg.axis().scale(yScaled).orient("left").ticks(10);
+
+var tooltip = d3.select("#results").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(0, "+(h-pad)+")")
+    .call(xAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("x", w)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .text("Year");
+ 
+svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate("+(left_pad-pad)+", 0)")
+    .call(yAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".7em")
+      .style("text-anchor", "end")
+      .text("Percentage Overall");
+ 
+svg.selectAll("circle")
+    .data(dataIn)
+    .enter()
+    .append("circle")
+    .attr("class", "circle")
+    .style("fill", function(d){ if(d[2] == 7)  return "rgb(250,208,90)"; })
+    .attr("cx", xMapped)
+    .attr("cy", pad)
+  //   .on("mouseover", function(d) {
+  //     tooltip.transition()
+  //          .duration(200)
+  //          .style("opacity", .9);
+  //     tooltip.html("<span style=\"font-family: 'Oswald', sans-serif\"> Percentage <br/>" + y(d) + "</span>")
+  //          .style("left", (parseInt(d3.select(this).attr("cx")) + 0.054*w)+ "px")
+  //          .style("top", (parseInt(d3.select(this).attr("cy")) + 0.05*h)+ "px");
+  //   })
+  //   .on("mouseout", function(d) {
+  //       tooltip.transition()
+  //            .duration(500)
+  //            .style("opacity", 0);
+  //   })
+  //    .transition()
+  //    .attr("cy", yMapped)
+  //    // .delay(900)
+  //     .delay(function(d, i) { return i * 80; })
+  // // .ease("bounce")    
+  //     .attr("r", function(d){ return d[2] * 1.5 + 6; });
+
+  //  }
+</script>
